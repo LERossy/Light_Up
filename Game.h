@@ -59,6 +59,7 @@ class Game
         // object state
         std::vector <Projectile> Projectiles;
         std::vector <Block>		 Blocks;
+        bool Collided[6];
         
         // constructor/destructor
         Game(GLFWwindow* window, unsigned int width, unsigned int height);
@@ -67,7 +68,7 @@ class Game
         void Init();
         // game loop
         void DoCollisions();
-        CollisionDirections/*glm::vec3*/ DoCameraCollisions();
+        void /*CollisionDirections*/ DoCameraCollisions();
         void ProcessInput(float dt);
         void CheckButtons(double mousePosX, double mousePosY);
         bool CheckCollision(Projectile projectile, Block block);

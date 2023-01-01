@@ -114,7 +114,7 @@ void Game::DoCollisions()
 	}
 }  
 
-CollisionDirections/*glm::vec3*/ Game::DoCameraCollisions()
+void /*CollisionDirections*/ Game::DoCameraCollisions()
 {
 	for (int i = 0; i < this->Blocks.size(); i++) 
 	{
@@ -122,54 +122,71 @@ CollisionDirections/*glm::vec3*/ Game::DoCameraCollisions()
 		//return(direction);
 		
 		if (direction.x < 0.0) {
-			return (NORTH);
+			if (this->camera->Position.y - this->Blocks[i].Position.y < 0.75) 
+				Collided[0] = true;
+			//return (NORTH);
 		} else if (direction.x > 0.0) {
-			return (SOUTH);
+			if (this->camera->Position.y - this->Blocks[i].Position.y < 0.75)
+				Collided[1] = true;
+			//return (SOUTH);
 		} else {
 			if (direction.z < 0.0) {
-				return (EAST);
+				if (this->camera->Position.y - this->Blocks[i].Position.y < 0.75)
+					Collided[2] = true;
+				//return (EAST);
 			} else if (direction.z > 0.0) {
-				return (WEST);
+				if (this->camera->Position.y - this->Blocks[i].Position.y < 0.75)
+					Collided[3] = true;
+				//return (WEST);
 			} else {
 				if (direction.y < 0.0) {
-					return (TOP);
+					Collided[4] = true;
+					//return (TOP);
 				} else if (direction.y > 0.0) {
-					return (BOTTOM);
+					Collided[5] = true;
+					//return (BOTTOM);
 				}
 			}
 		}
 		
 	}
 	
-	return (NONE);
+	//return (NONE);
 }  
 
 void Game::ProcessInput(float dt)
 {
     if (this->Keys[GLFW_KEY_W])
     {
-    	this->camera->ProcessKeyboard(FORWARD, this->DoCameraCollisions(), dt);
+    	this->camera->ProcessKeyboard(FORWARD, Collided/*this->DoCameraCollisions()*/, dt);
     	//std::cout << this->camera->Position.x << " " << this->camera->Position.y << " " << this->camera->Position.z << std::endl;
     	//this->camera->UpdateCamPos(this->DoCameraCollisions());
     }
     if (this->Keys[GLFW_KEY_S])
     {
-    	this->camera->ProcessKeyboard(BACKWARD, this->DoCameraCollisions(), dt);
+    	this->camera->ProcessKeyboard(BACKWARD, Collided/*this->DoCameraCollisions()*/, dt);
     	//std::cout << this->camera->Position.x << " " << this->camera->Position.y << " " << this->camera->Position.z << std::endl;
     	//this->camera->UpdateCamPos(this->DoCameraCollisions());
     }
     if (this->Keys[GLFW_KEY_A])
     {
-    	this->camera->ProcessKeyboard(LEFT, this->DoCameraCollisions(), dt);
+    	this->camera->ProcessKeyboard(LEFT, Collided /*this->DoCameraCollisions()*/, dt);
     	//std::cout << this->camera->Position.x << " " << this->camera->Position.y << " " << this->camera->Position.z << std::endl;
     	//this->camera->UpdateCamPos(this->DoCameraCollisions());
     }
     if (this->Keys[GLFW_KEY_D])
     {
-    	this->camera->ProcessKeyboard(RIGHT, this->DoCameraCollisions(), dt);
+    	this->camera->ProcessKeyboard(RIGHT, Collided /*this->DoCameraCollisions()*/, dt);
     	//std::cout << this->camera->Position.x << " " << this->camera->Position.y << " " << this->camera->Position.z << std::endl;
     	//this->camera->UpdateCamPos(this->DoCameraCollisions());
     }
+    if (this->Keys[GLFW_KEY_J] && !this->KeysProcessed[GLFW_KEY_J])
+    {
+    	this->camera->ProcessKeyboard(JUMP, Collided /*this->DoCameraCollisions()*/, dt);
+    	this->KeysProcessed[GLFW_KEY_SPACE] = true;
+    }
+    this->camera->tempVi = glm::vec3(0.0);
+    
     if (this->Keys[GLFW_KEY_SPACE])
     {
     	this->Force += 10.0;
@@ -249,8 +266,9 @@ glm::vec3 Game::CheckCollision(glm::vec3 position, Block block) // AABB - Circle
     if (glm::length(difference) <= 0.75) 
     {
     	float scale = glm::length(glm::vec3(0.75)) - glm::length(difference);
-    	glm::vec3 direction = glm::normalize(closest);
+    	glm::vec3 direction = glm::normalize(difference/*closest*/);
     	glm::vec3 offset = direction * scale;
+    	std::cout << direction.x << " " << direction.y << " " << direction.z << std::endl;
         return (/*offset*/direction);
     }
     else
@@ -301,9 +319,18 @@ void Game::Update(float dt)
 	
 	expiredProjectiles.clear();
 	
+	this->camera->UpdatePosition(Collided, dt);
 	
 	// check for collisions
 	this->DoCollisions();
+	
+	for (int i = 0; i < 6; i++) {
+		Collided[i] = false;
+	}
+	this->DoCameraCollisions();
+	if (Collided[4]) {
+		this->camera->stick = true;
+	}
 }
 
 void Game::Render()
@@ -396,7 +423,7 @@ std::vector<Block> Game::getClosestBlocks()
 	for (int i = 0; i < Blocks.size(); i++) 
 	{
 		glm::vec3 pos = Blocks[i].Position;
-		if (abs(glm::length(pos - this->camera->Position)) <= 3.0) 
+		if (abs(glm::length(pos - this->camera->Position)) <= 5.0) 
 		{
 			closestCubes.push_back(Blocks[i]);
 		}

@@ -2,8 +2,8 @@
 #define CAMERA_H
 
 #include <glad/glad.h>
-#include "glm/glm/glm.hpp"
-#include "glm/glm/gtc/matrix_transform.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 #include <vector>
 
@@ -14,7 +14,8 @@ enum Camera_Movement {
 	FORWARD,
 	BACKWARD,
 	LEFT,
-	RIGHT
+	RIGHT,
+	JUMP
 };
 
 enum CollisionDirections {
@@ -46,6 +47,9 @@ public:
 	glm::vec3 Up;
 	glm::vec3 Right;
 	glm::vec3 WorldUp;
+	glm::vec3 Fnet;
+	glm::vec3 Vi;
+	glm::vec3 tempVi;
 	// euler Angles
 	float Yaw;
 	float Pitch;
@@ -53,6 +57,9 @@ public:
 	float MovementSpeed;
 	float MouseSensitivity;
 	float fov;
+	// other
+	const float g = 9.8;
+	bool stick = true;
 
 	// constructor with vectors
 	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), fov(ZOOM)
@@ -103,9 +110,19 @@ public:
 						if (Front.x < 0.0) {
 							Position.z += Front.z * velocity;
 						}
+						else
+						{
+							Position.x += Front.x * velocity;
+							Position.z += Front.z * velocity;
+						}
 						break;
 					case SOUTH:
 						if (Front.x > 0.0) {
+							Position.z += Front.z * velocity;
+						}
+						else
+						{
+							Position.x += Front.x * velocity;
 							Position.z += Front.z * velocity;
 						}
 						break;
@@ -113,10 +130,20 @@ public:
 						if (Front.z < 0.0) {
 							Position.x += Front.x * velocity;
 						}
+						else
+						{
+							Position.x += Front.x * velocity;
+							Position.z += Front.z * velocity;
+						}
 						break;
 					case WEST:
 						if (Front.z > 0.0) {
 							Position.x += Front.x * velocity;
+						}
+						else
+						{
+							Position.x += Front.x * velocity;
+							Position.z += Front.z * velocity;
 						}
 						break;
 					default:
@@ -133,11 +160,19 @@ public:
 							Position.y += Front.y * velocity;
 							Position.z += Front.z * velocity;
 						}
+						else
+						{
+							Position += Front * velocity;
+						}
 						break;
 					case SOUTH:
 						if (Front.x > 0.0) {
 							Position.y += Front.y * velocity;
 							Position.z += Front.z * velocity;
+						}
+						else
+						{
+							Position += Front * velocity;
 						}
 						break;
 					case EAST:
@@ -145,11 +180,19 @@ public:
 							Position.y += Front.y * velocity;
 							Position.x += Front.x * velocity;
 						}
+						else
+						{
+							Position += Front * velocity;
+						}
 						break;
 					case WEST:
 						if (Front.z > 0.0) {
 							Position.y += Front.y * velocity;
 							Position.x += Front.x * velocity;
+						}
+						else
+						{
+							Position += Front * velocity;
 						}
 						break;
 					case TOP:
@@ -157,11 +200,19 @@ public:
 							Position.x += Front.x * velocity;
 							Position.z += Front.z * velocity;
 						}
+						else
+						{
+							Position += Front * velocity;
+						}
 						break;
 					case BOTTOM:
 						if (Front.y > 0.0) {
 							Position.x += Front.x * velocity;
 							Position.z += Front.z * velocity;
+						}
+						else
+						{
+							Position += Front * velocity;
 						}
 						break;
 					default:
@@ -179,9 +230,19 @@ public:
 						if (Front.x > 0.0) {
 							Position.z -= Front.z * velocity;
 						}
+						else
+						{
+							Position.x -= Front.x * velocity;
+							Position.z -= Front.z * velocity;
+						}
 						break;
 					case SOUTH:
 						if (Front.x < 0.0) {
+							Position.z -= Front.z * velocity;
+						}
+						else
+						{
+							Position.x -= Front.x * velocity;
 							Position.z -= Front.z * velocity;
 						}
 						break;
@@ -189,10 +250,20 @@ public:
 						if (Front.z > 0.0) {
 							Position.x -= Front.x * velocity;
 						}
+						else
+						{
+							Position.x -= Front.x * velocity;
+							Position.z -= Front.z * velocity;
+						}
 						break;
 					case WEST:
 						if (Front.z < 0.0) {
 							Position.x -= Front.x * velocity;
+						}
+						else
+						{
+							Position.x -= Front.x * velocity;
+							Position.z -= Front.z * velocity;
 						}
 						break;
 					default:
@@ -209,11 +280,19 @@ public:
 							Position.y -= Front.y * velocity;
 							Position.z -= Front.z * velocity;
 						}
+						else
+						{
+							Position -= Front * velocity;
+						}
 						break;
 					case SOUTH:
 						if (Front.x < 0.0) {
 							Position.y -= Front.y * velocity;
 							Position.z -= Front.z * velocity;
+						}
+						else
+						{
+							Position -= Front * velocity;
 						}
 						break;
 					case EAST:
@@ -221,11 +300,19 @@ public:
 							Position.y -= Front.y * velocity;
 							Position.x -= Front.x * velocity;
 						}
+						else
+						{
+							Position -= Front * velocity;
+						}
 						break;
 					case WEST:
 						if (Front.z < 0.0) {
 							Position.y -= Front.y * velocity;
 							Position.x -= Front.x * velocity;
+						}
+						else
+						{
+							Position -= Front * velocity;
 						}
 						break;
 					case TOP:
@@ -233,11 +320,19 @@ public:
 							Position.x -= Front.x * velocity;
 							Position.z -= Front.z * velocity;
 						}
+						else
+						{
+							Position -= Front * velocity;
+						}
 						break;
 					case BOTTOM:
 						if (Front.y < 0.0) {
 							Position.x -= Front.x * velocity;
 							Position.z -= Front.z * velocity;
+						}
+						else
+						{
+							Position -= Front * velocity;
 						}
 						break;
 					default:
@@ -253,11 +348,19 @@ public:
 						Position.y -= Right.y * velocity;
 						Position.z -= Right.z * velocity;
 					}
+					else
+					{
+						Position -= Right * velocity;
+					}
 					break;
 				case SOUTH:
 					if (Right.x < 0.0) {
 						Position.y -= Right.y * velocity;
 						Position.z -= Right.z * velocity;
+					}
+					else
+					{
+						Position -= Right * velocity;
 					}
 					break;
 				case EAST:
@@ -265,11 +368,19 @@ public:
 						Position.y -= Right.y * velocity;
 						Position.x -= Right.x * velocity;
 					}
+					else
+					{
+						Position -= Right * velocity;
+					}
 					break;
 				case WEST:
 					if (Right.z < 0.0) {
 						Position.y -= Right.y * velocity;
 						Position.x -= Right.x * velocity;
+					}
+					else
+					{
+						Position -= Right * velocity;
 					}
 					break;
 				case TOP:
@@ -277,11 +388,19 @@ public:
 						Position.x -= Right.x * velocity;
 						Position.z -= Right.z * velocity;
 					}
+					else
+					{
+						Position -= Right * velocity;
+					}
 					break;
 				case BOTTOM:
 					if (Right.y < 0.0) {
 						Position.x -= Right.x * velocity;
 						Position.z -= Right.z * velocity;
+					}
+					else
+					{
+						Position -= Right * velocity;
 					}
 					break;
 				default:
@@ -295,11 +414,19 @@ public:
 						Position.y += Right.y * velocity;
 						Position.z += Right.z * velocity;
 					}
+					else
+					{
+						Position += Right * velocity;
+					}
 					break;
 				case SOUTH:
 					if (Right.x < 0.0) {
 						Position.y += Right.y * velocity;
 						Position.z += Right.z * velocity;
+					}
+					else
+					{
+						Position += Right * velocity;
 					}
 					break;
 				case EAST:
@@ -307,11 +434,19 @@ public:
 						Position.y += Right.y * velocity;
 						Position.x += Right.x * velocity;
 					}
+					else
+					{
+						Position += Right * velocity;
+					}
 					break;
 				case WEST:
 					if (Right.z < 0.0) {
 						Position.y += Right.y * velocity;
 						Position.x += Right.x * velocity;
+					}
+					else
+					{
+						Position += Right * velocity;
 					}
 					break;
 				case TOP:
@@ -319,11 +454,19 @@ public:
 						Position.x += Right.x * velocity;
 						Position.z += Right.z * velocity;
 					}
+					else
+					{
+						Position += Right * velocity;
+					}
 					break;
 				case BOTTOM:
 					if (Right.y < 0.0) {
 						Position.x += Right.x * velocity;
 						Position.z += Right.z * velocity;
+					}
+					else
+					{
+						Position += Right * velocity;
 					}
 					break;
 				default:
@@ -333,9 +476,292 @@ public:
 		//std::cout << collision << std::endl;
 	}
 	
+	
+	void ProcessKeyboard(Camera_Movement direction, bool collided[], float deltaTime)
+	{
+		float velocity = MovementSpeed * deltaTime;
+		if (collided[4] || Position.y <= 0.5) 
+		{
+			Fnet.y = 0.0;
+			if (Position.y < 0.5) {
+				Position.y = 0.5;
+			}
+			stick = true;
+			
+			if (direction == FORWARD)
+			{
+				if (collided[0]) {
+					if (!(Front.x < 0.0)) {
+						Position.x += Front.x * velocity;
+						tempVi.x = Front.x * MovementSpeed;
+					}
+					else {
+						tempVi.x = 0.0;
+					}
+				}
+				else if (collided[1]) {
+					if (!(Front.x > 0.0)) {
+						Position.x += Front.x * velocity;
+						tempVi.x = Front.x * MovementSpeed;
+					}
+					else {
+						tempVi.x = 0.0;
+					}
+				}
+				else {
+					Position.x += Front.x * velocity;
+					tempVi.x = Front.x * MovementSpeed;
+				}
+				
+				if (collided[2]) {
+					if (!(Front.z < 0.0)) {
+						Position.z += Front.z * velocity;
+						tempVi.z = Front.z * MovementSpeed;
+					}
+					else {
+						tempVi.z = 0.0;
+					}
+				}
+				else if (collided[3]) {
+					if (!(Front.z > 0.0)) {
+						Position.z += Front.z * velocity;
+						tempVi.z = Front.z * MovementSpeed;
+					}
+					else {
+						tempVi.z = 0.0;
+					}
+				}
+				else {
+					Position.z += Front.z * velocity;
+					tempVi.z = Front.z * MovementSpeed;
+				}
+				
+				/*
+				if (collided[4]) {
+					if (!(Front.y < 0.0)) {
+						Position.y += Front.y * velocity;
+					}
+				}
+				else if (collided[5]) {
+					if (!(Front.y > 0.0)) {
+						Position.y += Front.y * velocity;
+					}
+				}
+				else if (Position.y < 0.5) {
+					if (!(Front.y < 0.0)) {
+						Position.y += Front.y * velocity;
+					}
+				}
+				else {
+					Position.y += Front.y * velocity;
+				}
+				*/
+			}
+			
+			else if (direction == BACKWARD)
+			{
+				if (collided[0]) {
+					if (!(Front.x > 0.0)) {
+						Position.x -= Front.x * velocity;
+						tempVi.x = -1.0 * Front.x * MovementSpeed;
+					}
+					else {
+						tempVi.x = 0.0;
+					}
+				}
+				else if (collided[1]) {
+					if (!(Front.x < 0.0)) {
+						Position.x -= Front.x * velocity;
+						tempVi.x = -1.0 * Front.x * MovementSpeed;
+					}
+					else {
+						tempVi.x = 0.0;
+					}
+				}
+				else {
+					Position.x -= Front.x * velocity;
+					tempVi.x = -1.0 * Front.x * MovementSpeed;
+				}
+				
+				if (collided[2]) {
+					if (!(Front.z > 0.0)) {
+						Position.z -= Front.z * velocity;
+						tempVi.z = -1.0 * Front.z * MovementSpeed;
+					}
+					else {
+						tempVi.z = 0.0;
+					}
+				}
+				else if (collided[3]) {
+					if (!(Front.z < 0.0)) {
+						Position.z -= Front.z * velocity;
+						tempVi.z = -1.0 * Front.z * MovementSpeed;
+					}
+					else {
+						tempVi.z = 0.0;
+					}
+				}
+				else {
+					Position.z -= Front.z * velocity;
+					tempVi.z = -1.0 * Front.z * MovementSpeed;
+				}
+				
+				/*
+				if (collided[4]) {
+					if (!(Front.y > 0.0)) {
+						Position.y -= Front.y * velocity;
+					}
+				}
+				else if (collided[5]) {
+					if (!(Front.y < 0.0)) {
+						Position.y -= Front.y * velocity;
+					}
+				}
+				else if (Position.y < 0.5) {
+					if (!(Front.y > 0.0)) {
+						Position.y -= Front.y * velocity;
+					}
+				}
+				else {
+					Position.y -= Front.y * velocity;
+				}
+				*/
+			}
+			
+			else if (direction == LEFT) {
+				if (collided[0]) {
+					if (!(Right.x > 0.0)) {
+						Position.x -= Right.x * velocity;
+						tempVi.x = -1.0 * Right.x * MovementSpeed;
+					}
+					else {
+						tempVi.x = 0.0;
+					}
+				}
+				else if (collided[1]) {
+					if (!(Right.x < 0.0)) {
+						Position.x -= Right.x * velocity;
+						tempVi.x = -1.0 * Right.x * MovementSpeed;
+					}
+					else {
+						tempVi.x = 0.0;
+					}
+				}
+				else {
+					Position.x -= Right.x * velocity;
+					tempVi.x = -1.0 * Right.x * MovementSpeed;
+				}
+				
+				if (collided[2]) {
+					if (!(Right.z > 0.0)) {
+						Position.z -= Right.z * velocity;
+						tempVi.z = -1.0 * Right.z * MovementSpeed;
+					}
+					else {
+						tempVi.z = 0.0;
+					}
+				}
+				else if (collided[3]) {
+					if (!(Right.z < 0.0)) {
+						Position.z -= Right.z * velocity;
+						tempVi.z = -1.0 * Right.z * MovementSpeed;
+					}
+					else {
+						tempVi.z = 0.0;
+					}
+				}
+				else {
+					Position.z -= Right.z * velocity;
+					tempVi.z = -1.0 * Right.z * MovementSpeed;
+				}
+			}
+			
+			else if (direction == RIGHT) {
+				if (collided[0]) {
+					if (!(Right.x < 0.0)) {
+						Position.x += Right.x * velocity;
+						tempVi.x = Right.x * MovementSpeed;
+					}
+					else {
+						tempVi.x = 0.0;
+					}
+				}
+				else if (collided[1]) {
+					if (!(Right.x > 0.0)) {
+						Position.x += Right.x * velocity;
+						tempVi.x = Right.x * MovementSpeed;
+					}
+					else {
+						tempVi.x = 0.0;
+					}
+				}
+				else {
+					Position.x += Right.x * velocity;
+					tempVi.x = Right.x * MovementSpeed;
+				}
+				
+				if (collided[2]) {
+					if (!(Right.z < 0.0)) {
+						Position.z += Right.z * velocity;
+						tempVi.z = Right.z * MovementSpeed;
+					}
+					else {
+						tempVi.z = 0.0;
+					}
+				}
+				else if (collided[3]) {
+					if (!(Right.z > 0.0)) {
+						Position.z += Right.z * velocity;
+						tempVi.z = Right.z * MovementSpeed;
+					}
+					else {
+						tempVi.z = 0.0;
+					}
+				}
+				else {
+					Position.z += Right.z * velocity;
+					tempVi.z = Right.z * MovementSpeed;
+				}
+			}
+			if (direction == JUMP) {
+				Vi.y = 8.3;
+				Fnet.y = -9.8;
+				Vi.x = tempVi.x;
+				Vi.z = tempVi.z;
+				stick = false;
+			}
+			//std::cout << collision << std::endl;
+		}
+		else if (collided[5]) {
+			Vi = glm::vec3(0.0);
+		}
+		else {
+			Fnet.y = -9.8;
+		}
+	}
+	
 	void UpdateCamPos(glm::vec3 offset) {
 		Position = TempPosition + offset;
 		TempPosition = Position;
+	}
+	
+	void UpdatePosition(bool collided[], float dt) {
+		if (collided[0] || collided[1]) {
+			Vi.x = 0.0;
+		}
+		if (collided[2] || collided[3]) {
+			Vi.z = 0.0;
+		}
+		
+		if (Fnet.y != 0.0 && Position.y >= 0.5 && (!stick || !collided[4])) {
+			Position.x += dt * Vi.x;
+			Position.y += dt * Vi.y + 0.5 * Fnet.y * dt * dt;
+			Position.z += dt * Vi.z;
+			Vi.y = Fnet.y * dt + Vi.y;
+		}
+		else {
+			Fnet.y = 0.0;
+		}
 	}
 	
 
